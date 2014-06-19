@@ -18,7 +18,17 @@ namespace LinkTagger.Implementation.LinkTagger
         private readonly ITextView _textView;
         private readonly ClassificationTag _classificationTag;
         private readonly ILinkTaggerUtil _linkTaggerUtil;
-        private event EventHandler _changed;
+
+        // The interface forces us to implement these event but we never raise it.  This is
+        // by design.  The tag information we return for a given query is immutable 
+#pragma warning disable 67
+        public event EventHandler Changed;
+#pragma warning restore 67
+
+        public ITextSnapshot TextSnapshot
+        {
+            get { return _textView.TextSnapshot; }
+        }
 
         internal LinkTaggerSource(ITextView textView, IClassificationType classificationType, ILinkTaggerUtil linkTaggerUtil)
         {
@@ -27,7 +37,7 @@ namespace LinkTagger.Implementation.LinkTagger
             _linkTaggerUtil = linkTaggerUtil;
         }
 
-        private ReadOnlyCollection<ITagSpan<ClassificationTag>> GetTags(SnapshotSpan span)
+        public ReadOnlyCollection<ITagSpan<ClassificationTag>> GetTags(SnapshotSpan span)
         {
             var list = new List<ITagSpan<ClassificationTag>>();
             var snapshot = span.Snapshot;
@@ -35,7 +45,7 @@ namespace LinkTagger.Implementation.LinkTagger
             while (i < span.Length)
             {
                 int position = i + span.Start.Position;
-                var linkText = _linkTaggerUtil.GetLinkText(new SnapshotPoint(snapshot, position));
+                var linkText = _linkTaggerUtil.GetLinkTextFromStart(new SnapshotPoint(snapshot, position));
                 if (linkText != null)
                 {
                     var snapshotSpan = new SnapshotSpan(snapshot, position, linkText.Length);
@@ -51,54 +61,5 @@ namespace LinkTagger.Implementation.LinkTagger
 
             return new ReadOnlyCollection<ITagSpan<ClassificationTag>>(list);
         }
-
-        private static bool StartsWith(ITextSnapshot snapshot, int position, string target)
-        {
-            if (position + target.Length >= snapshot.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < target.Length; i++)
-            {
-                if (snapshot[i + position] != target[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static string GetUserName(ITextSnapshot snapshot, int startPosition)
-        {
-            int endPosition = startPosition;
-            while (endPosition < snapshot.Length && !Char.IsWhiteSpace(snapshot[endPosition]))
-            {
-                endPosition++;
-            }
-
-            return snapshot.GetText(startPosition, endPosition - startPosition);
-        }
-
-#region IBasicTaggerSource
-
-        ITextSnapshot IBasicTaggerSource<ClassificationTag>.TextSnapshot
-        {
-            get { return _textView.TextSnapshot; }
-        }
-
-        event EventHandler IBasicTaggerSource<ClassificationTag>.Changed
-        {
-            add { _changed += value; }
-            remove { _changed -= value; }
-        }
-
-        ReadOnlyCollection<ITagSpan<ClassificationTag>> IBasicTaggerSource<ClassificationTag>.GetTags(SnapshotSpan span)
-        {
-            return GetTags(span);
-        }
-
-#endregion
     }
 }

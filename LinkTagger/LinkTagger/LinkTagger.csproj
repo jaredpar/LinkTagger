@@ -71,11 +71,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Implementation\ClickHandler\LinkTaggerMouseProcessor.cs" />
+    <Compile Include="Implementation\ClickHandler\LinkTaggerMouseProcessorProvider.cs" />
     <Compile Include="Implementation\Misc\LinkTaggerUtil.cs" />
     <Compile Include="Implementation\LinkTagger\LinkTaggerFormatDefinition.cs" />
     <Compile Include="Implementation\LinkTagger\LinkTaggerSource.cs" />
     <Compile Include="Implementation\LinkTagger\LinkTaggerSourceFactory.cs" />
-    <Compile Include="LinkTaggerUtil.cs" />
+    <Compile Include="ILinkTaggerUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

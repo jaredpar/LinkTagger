@@ -20,7 +20,7 @@ namespace LinkTagger.Implementation.LinkTagger
         {
             DisplayName = "Link Tagger";
             TextDecorations = System.Windows.TextDecorations.Underline;
-            ForegroundColor = Colors.Red;
+            ForegroundColor = Colors.Blue;
         }
     }
 

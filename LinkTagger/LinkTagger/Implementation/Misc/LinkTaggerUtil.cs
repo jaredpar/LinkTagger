@@ -30,7 +30,7 @@ namespace LinkTagger.Implementation.Misc
             return true;
         }
 
-        private static string GetUserName(ITextSnapshot snapshot, int startPosition)
+        private static string GetUserNameFromStart(ITextSnapshot snapshot, int startPosition)
         {
             int endPosition = startPosition;
             while (endPosition < snapshot.Length && !Char.IsWhiteSpace(snapshot[endPosition]))
@@ -41,9 +41,9 @@ namespace LinkTagger.Implementation.Misc
             return snapshot.GetText(startPosition, endPosition - startPosition);
         }
 
-        public string GetLinkText(SnapshotPoint point)
+        public string GetLinkTextFromStart(SnapshotPoint point)
         {
-            string userName = GetUserName(point);
+            string userName = GetUserNameFromStart(point);
             if (userName != null)
             {
                 return LinkPrefix + userName;
@@ -54,9 +54,24 @@ namespace LinkTagger.Implementation.Misc
 
         public string GetUserName(SnapshotPoint point)
         {
+            while (point.Position > 0 && !Char.IsWhiteSpace(point.GetChar()))
+            {
+                point = point.Subtract(1);
+            }
+
+            if (Char.IsWhiteSpace(point.GetChar()))
+            {
+                point = point.Add(1);
+            }
+
+            return GetUserNameFromStart(point);
+        }
+
+        public string GetUserNameFromStart(SnapshotPoint point)
+        {
             if (StartsWith(point.Snapshot, point.Position, LinkPrefix))
             {
-                return GetUserName(point.Snapshot, point.Position + LinkPrefix.Length);
+                return GetUserNameFromStart(point.Snapshot, point.Position + LinkPrefix.Length);
             }
 
             return null;
